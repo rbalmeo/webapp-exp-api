@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="get-user-flow" doc:id="fc90c04e-3124-4ad2-ba3f-72b02205d7f5" >
+		<logger level="INFO" doc:name="Get User Start Log" doc:id="73ff9b39-6e2d-4e23-9240-87a3cbfbffd2" message='#["Get Users Start: " ++ write(vars.commonHeaders,"application/json")]' />
+		<flow-ref doc:name="Invoke Get User API" doc:id="4ba92296-032f-41b4-a2b7-4efeda83bd7a" name="userprofileprocapi-get-user-subflow" />
+		<ee:transform doc:name="Construct Response" doc:id="cd3cd460-bd94-4cb9-8505-183eb936ee39" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Get User End Log" doc:id="212269ad-396e-4744-8a98-397e18ea974b" message='#["Get Users End: " ++ write(payload,"application/json")]' />
+	<error-handler ref="main-error-handler"/>
+	</flow>
+	<flow name="get-user-byusername-flow" doc:id="944fa28e-f759-4e54-a936-ef83ab3297df" >
+		<logger level="INFO" doc:name="Get User By Username Start Log" doc:id="51260966-cfcb-4b97-8f97-02df8d8f0cc2" message='#["Get User By Username Start: " ++ write(vars.commonHeaders,"application/json")]' />
+		<ee:transform doc:name="Init Vars" doc:id="bfda9d51-8440-4b47-b7a9-877cdc6095e4">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="username" ><![CDATA[%dw 2.0
+output application/java
+---
+attributes.uriParams.username]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="Invoke Get User API" doc:id="0d3cc551-816d-4a7f-b16f-73c11ba15ac3" name="userprofileprocapi-get-user-byusername-subflow" />
+		<ee:transform doc:name="Construct Response" doc:id="b3ac9a93-d461-4726-a450-62a8b1803d11">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Get User End Log" doc:id="575daa47-1635-46e5-b929-fcdf3d57f604" message='#["Get User End: " ++ write(payload,"application/json")]' />
+	<error-handler ref="main-error-handler"/>
+	</flow>
+</mule>

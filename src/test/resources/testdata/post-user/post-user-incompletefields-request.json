@@ -1,0 +1,10 @@
+{
+	"users": [
+	 	{
+	 		"username":"userAbc",
+	 		"fullname":"John White Smith",
+	 		"birthday":"02-05-1990",
+	 		"gender":"male"
+	 	}
+ 	]
+}

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="post-user-flow" doc:id="87e85962-d8bc-4ca3-ae32-352f71c11c07" >
+		<logger level="INFO" doc:name="Post User Start Log" doc:id="80031f49-f07f-4f81-84c2-392363aa8d5c" message='#["Post User Start: " ++ write(payload, "application/json")]' />
+		<flow-ref doc:name="Invoke Post User API" doc:id="547a638d-6702-4d7c-bead-38554d44e3ef" name="userprofileprocapi-post-user-subflow"/>
+		<ee:transform doc:name="Construct Response" doc:id="80ec3f65-de24-4bea-adb0-c77f91a225d2">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":p('secure::webappexpapi.status.success')
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Post User End Log" doc:id="66ee5c75-4a98-44b6-a1bd-8e413b10368f" message='#["Post User End"]' />
+	<error-handler ref="main-error-handler"/>
+	</flow>
+</mule>

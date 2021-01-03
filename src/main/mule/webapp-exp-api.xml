@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+     <flow name="webapp-exp-api-main">
+        <http:listener config-ref="webapp-exp-api-httpListenerConfig" path="/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <ee:transform doc:name="Init Vars" doc:id="7279bfa0-0aeb-4243-b67a-bd3900063c92">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="commonHeaders"><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"correlationId": if(isEmpty(attributes.headers.'x-correlationid')) uuid() else attributes.headers.'x-correlationid',
+	"code": attributes.headers.'x-code'
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<choice doc:name="Choice
+Route 1: Raise Unauthorized Error
+Default: Do Nothing" doc:id="f20eea4d-108c-4d48-85c6-46a4d73c3558">
+			<when expression="#[isEmpty(vars.commonHeaders.code) or sizeOf(vars.commonHeaders.code) != p('secure::webappexpapi.http.header.code.size') as Number default 0]">
+				<raise-error doc:name="Raise Unauthorized Error" doc:id="9ec0d52f-75fa-4ba8-9086-70eaf637fd6a" type="CUST:UNAUTHORIZED" description='#["Unauthorized"]' />
+			</when>
+		</choice>
+		<apikit:router config-ref="webapp-exp-api-config" />
+	<error-handler ref="apikit-error-handler"/>
+    </flow>
+    <flow name="webapp-exp-api-console">
+        <http:listener config-ref="webapp-exp-api-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="webapp-exp-api-config" />
+        	<error-handler ref="apikit-error-handler"/>
+    </flow>
+    <flow name="get:\users:webapp-exp-api-config">
+        <flow-ref doc:name="Invoke Get Users" doc:id="bc443a15-c7f0-47f1-a024-576dc98da984" name="get-user-flow"/>
+    </flow>
+    <flow name="get:\users\(username):webapp-exp-api-config">
+        <flow-ref doc:name="Invoke Get User By Username" doc:id="bdc23a16-6864-4de1-ae8e-aea893116c25" name="get-user-byusername-flow"/>
+    </flow>
+    <flow name="post:\users:application\json:webapp-exp-api-config">
+		<flow-ref doc:name="Invoke Post User" doc:id="1f18fbb5-3daa-400c-b753-a8e23bc8d465" name="post-user-flow"/>
+    </flow>
+</mule>

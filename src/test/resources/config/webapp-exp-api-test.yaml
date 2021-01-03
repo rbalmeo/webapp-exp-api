@@ -1,0 +1,25 @@
+api.autodiscovery.id: "16555728"
+webappexpapi:
+  name: "webapp-exp-api"
+  version: "v1"
+  http:
+    path:
+      base: "/v1"
+      resource: "/*"
+      console: "/console/*"
+    port: "8081"
+    header:
+      code.size: "16"
+  status:
+    success: "Success"
+    failure: "Failure"
+
+userprofileprocapi:
+  http:
+    basepath: "/v1" 
+    path: 
+      users: "/users"
+    host: "account-sys-api-v1.us-e2.cloudhub.io"
+    port: ""
+    timeout: "10000"
+     

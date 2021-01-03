@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<munit:config name="get-user-byusername-test-suite.xml" />
+	<import doc:name="Import" doc:id="c497b904-eecd-4258-bd10-3f6dd85e8540" file="test-global-config.xml"/>
+	<munit:test name="get-user-byusername-success-test" doc:id="c7506417-0e21-4f98-9d94-247f84b2c44d" description="Test">
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="webapp-exp-api-main" />
+			<munit:enable-flow-source value="get:\users\(username):webapp-exp-api-config" />
+		</munit:enable-flow-sources>
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when Get User by Username API" doc:id="fd5d2d84-f984-488e-a43f-a53ac657170b" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Get User by Username API" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('testdata/get-user/byusername/get-user-response.json')]" mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<http:request method="GET" doc:name="Request" doc:id="277257bd-464a-430e-89db-9c534929f7db" config-ref="HTTPS_Test_Request_configuration" path="/users/john123">
+				<http:headers ><![CDATA[#[output application/java
+---
+{
+	"x-code" : "1234567890abcdef",
+	"x-correlationid" : "test"
+}]]]></http:headers>
+			</http:request>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call doc:name="Verify call Get User by Username API" doc:id="d391a4c8-41be-4b61-89a9-af6087c7ee2d" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Get User by Username API" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:assert-that doc:name="Assert Response Payload" doc:id="2fc3984e-6561-4f65-bbcf-b45783a24fe2" expression="#[output application/java --- (write(payload, 'application/json') as String) replace /(\s+)/  with '']" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('testdata/get-user/byusername/get-user-response.json') replace /(\s+)/  with '')]" />
+		</munit:validation>
+	</munit:test>
+
+	<munit:test name="get-user-byusername-usernotfound-error-test" doc:id="28fa5c82-6aaa-4af3-a2dd-2388d4246bec" description="Test">
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="webapp-exp-api-main" />
+			<munit:enable-flow-source value="get:\users\(username):webapp-exp-api-config" />
+		</munit:enable-flow-sources>
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when Get User by Username API" doc:id="018e450b-77d4-433f-a65d-5410bdd6838d" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Get User by Username API" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:NOT_FOUND" />
+				</munit-tools:then-return>
+			
+</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<http:request method="GET" doc:name="Request" doc:id="9ce0b00a-f7dc-40e2-adb8-04b73c81e0a9" config-ref="HTTPS_Test_Request_configuration" path="/users/john123">
+				<http:headers ><![CDATA[#[output application/java
+---
+{
+	"x-code" : "1234567890abcdef",
+	"x-correlationid" : "test"
+}]]]></http:headers>
+			</http:request>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call doc:name="Verify call Log Exception" doc:id="4602d2e6-8c0d-460b-826f-a1fde35dcd38" processor="mule:logger">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Log Exception" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		
+</munit:validation>
+	</munit:test>
+	
+	<munit:test name="get-user-byusername-connectivity-error-test" doc:id="1f13b462-a741-4b20-b71f-ae8c9e2a4bff" description="Test">
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="webapp-exp-api-main" />
+			<munit:enable-flow-source value="get:\users:webapp-exp-api-config" />
+		</munit:enable-flow-sources>
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when Get User by Username API" doc:id="1423e4bc-8f63-443d-acf1-8335f665cedc" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Get User by Username API" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:CONNECTIVITY" />
+				</munit-tools:then-return>
+			
+
+</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<http:request method="GET" doc:name="Request" doc:id="6350f617-a437-4ca2-a63e-a72f0c0f47c9" config-ref="HTTPS_Test_Request_configuration" path="/users/john123" >
+				<http:headers ><![CDATA[#[output application/java
+---
+{
+	"x-code" : "1234567890abcdef",
+	"x-correlationid" : "test"
+}]]]></http:headers>
+			</http:request>
+		
+
+</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call doc:name="Log Exception" doc:id="d12cdedd-c1fd-463e-aae7-9518a66283b1" processor="mule:logger" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Log Exception" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+
+		</munit:validation>
+	
+</munit:test>
+	
+</mule>

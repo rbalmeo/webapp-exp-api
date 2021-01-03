@@ -1,0 +1,14 @@
+{
+	"users": [
+		{
+		    "username":"testuser011",
+		    "firstName": "Juan",
+		    "middleName": "Santos",
+		    "lastName": "Dela Cruz",
+		    "birthday":"1990-05-06",
+		    "gender":"male",
+		    "dateRegistered":"2020-01-01"
+		}
+
+ 	]
+}

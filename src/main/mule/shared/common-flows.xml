@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<sub-flow name="userprofileprocapi-get-user-subflow" doc:id="1010dcab-1c94-4e60-b60a-eaa36d44f6bb" >
+		<logger level="INFO" doc:name="Log Request" doc:id="48ce979b-0c31-4a10-a1dc-d1ec1664b5f9" message='#["Get User Request: "]'/>
+		<http:request method="GET" doc:name="Get User API" doc:id="12146526-6b29-4cd1-937a-06ab0100f30d" config-ref="UserProfileProcAPI_HTTP_Request_configuration" path="${secure::userprofileprocapi.http.path.users}">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"x-code" : vars.commonHeaders.code,
+	"x-correlationid" : vars.commonHeaders.correlationId
+}]]]></http:headers>
+		</http:request>
+		<logger level="INFO" doc:name="Log Response" doc:id="ec3c2d16-9528-409e-8458-62e2bad2281b" message='#["Get User Response: " ++ write(payload,"application/json")]'/>
+	</sub-flow>
+	<sub-flow name="userprofileprocapi-get-user-byusername-subflow" doc:id="24fb2ce9-37b0-452b-aea0-5a67e5a11df0" >
+		<logger level="TRACE" doc:name="Log Request" doc:id="8a7aa72a-5ac3-42b6-b818-2faa41181408" message='#["Get User by Username Request: " ++ write("username":vars.username, "application/json")]' />
+		<http:request method="GET" doc:name="Get User by Username API" doc:id="11fb0a97-5af4-4772-ac1b-520ccb7b454b" config-ref="UserProfileProcAPI_HTTP_Request_configuration" path="${secure::userprofileprocapi.http.path.users}/{username}">
+			<http:headers><![CDATA[#[output application/java
+---
+{
+	"x-code" : vars.commonHeaders.code,
+	"x-correlationid" : vars.commonHeaders.correlationId
+}]]]></http:headers>
+			<http:uri-params><![CDATA[#[output application/java
+---
+{
+	username : vars.username
+}]]]></http:uri-params>
+		</http:request>
+		<logger level="INFO" doc:name="Log Response" doc:id="c068bc65-d06f-4074-a6b3-16983b37873b" message='#["Get User by Username Response: " ++ write(payload, "application/json")]' />
+	</sub-flow>
+	<sub-flow name="userprofileprocapi-post-user-subflow" doc:id="e3d07095-32ef-485a-b81d-8e2d608cfee3" >
+		<logger level="TRACE" doc:name="Log Request" doc:id="0afcbc47-672a-43a0-b235-12a16749a33e" message='#["Post User Request: " ++ write(payload, "application/json")]' />
+		<http:request method="POST" doc:name="Post User API" doc:id="08c57958-87df-49f2-8338-178513740f15" config-ref="UserProfileProcAPI_HTTP_Request_configuration" path="${secure::userprofileprocapi.http.path.users}" >
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"x-code" : vars.commonHeaders.code,
+	"x-correlationid" : vars.commonHeaders.correlationId
+}]]]></http:headers>
+		</http:request>
+		<logger level="INFO" doc:name="Log Response" doc:id="322bb0e3-232c-4300-bd11-6206ee3d08cb" message='#["Post User Response: " ++ write(payload, "application/json")]' />
+	</sub-flow>
+</mule>
